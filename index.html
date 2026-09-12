@@ -1,1 +1,511 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌌 Color Dice</title>
 
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-family: Arial, sans-serif;
+  color: white;
+  background:
+    radial-gradient(circle at 50% 20%, #442080 0%, transparent 35%),
+    radial-gradient(circle at 80% 80%, #071c63 0%, transparent 40%),
+    #02030d;
+}
+
+/* Sterne */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(white 1px, transparent 1px),
+    radial-gradient(white 1px, transparent 1px);
+  background-size: 80px 80px, 130px 130px;
+  background-position: 10px 20px, 50px 70px;
+  opacity: .45;
+}
+
+/* Galaxy */
+.galaxy {
+  position: fixed;
+  width: 700px;
+  height: 700px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse, rgba(100,40,255,.8), transparent 45%),
+    radial-gradient(ellipse, rgba(0,160,255,.5), transparent 60%);
+  filter: blur(25px);
+  animation: rotate 25s linear infinite;
+  opacity: .35;
+  pointer-events: none;
+}
+
+@keyframes rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* LIVE Feld */
+.live-panel {
+  position: fixed;
+  left: 20px;
+  top: 20px;
+  width: 210px;
+  padding: 15px;
+  border-radius: 18px;
+  background: rgba(10, 10, 30, .82);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 0 25px rgba(80,80,255,.25);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.live-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.live-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255,0,0,.13);
+  border: 1px solid rgba(255,50,50,.35);
+}
+
+.live-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff1744, #8b0000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.live-name {
+  font-weight: bold;
+}
+
+.live-status {
+  color: #ff3b5c;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* VIP */
+.vip-button {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  z-index: 10;
+  border: none;
+  border-radius: 14px;
+  padding: 13px 18px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  background: linear-gradient(135deg, #6b2cff, #b000ff);
+  box-shadow: 0 0 20px rgba(150,0,255,.45);
+}
+
+.vip-button:hover {
+  transform: scale(1.05);
+}
+
+/* Hauptbereich */
+.container {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px 40px;
+}
+
+h1 {
+  font-size: clamp(35px, 7vw, 70px);
+  margin-bottom: 12px;
+  text-align: center;
+  text-shadow: 0 0 25px #724cff;
+}
+
+.subtitle {
+  opacity: .75;
+  margin-bottom: 35px;
+}
+
+/* Würfel */
+.dice-area {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.dice {
+  width: 115px;
+  height: 115px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  font-weight: bold;
+  border: 3px solid rgba(255,255,255,.45);
+  box-shadow: 0 10px 35px rgba(0,0,0,.4);
+  transition: transform .25s, box-shadow .25s;
+}
+
+.dice.roll {
+  animation: diceRoll .6s ease;
+}
+
+@keyframes diceRoll {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(12deg) scale(1.12); }
+  50% { transform: rotate(-12deg) scale(.92); }
+  75% { transform: rotate(8deg) scale(1.08); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+/* Farben */
+.red { background: #e53935; }
+.yellow { background: #fdd835; color: #111; }
+.blue { background: #1e88e5; }
+.green { background: #43a047; }
+.purple { background: #8e24aa; }
+.orange { background: #fb8c00; }
+
+/* Buttons */
+.buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.action-button {
+  border: none;
+  border-radius: 15px;
+  padding: 15px 25px;
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  background: linear-gradient(135deg, #553cff, #9d22ff);
+  box-shadow: 0 0 20px rgba(100,50,255,.35);
+  transition: .2s;
+}
+
+.action-button:hover {
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* Verlauf */
+.history-box {
+  width: min(850px, 95vw);
+  margin-top: 35px;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(10,10,30,.7);
+  border: 1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(10px);
+}
+
+.history-title {
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.history {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.history-color {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.3);
+}
+
+/* Coin */
+.coin-result {
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  min-height: 30px;
+}
+
+/* VIP Fenster */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,.75);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-box {
+  width: min(500px, 95vw);
+  padding: 30px;
+  border-radius: 25px;
+  background: linear-gradient(145deg, #12122c, #080818);
+  border: 1px solid rgba(255,255,255,.2);
+  box-shadow: 0 0 50px rgba(100,0,255,.4);
+  text-align: center;
+}
+
+.modal-box h2 {
+  margin-bottom: 15px;
+}
+
+.close {
+  margin-top: 20px;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+/* Handy */
+@media (max-width: 700px) {
+  .live-panel {
+    position: relative;
+    left: auto;
+    top: auto;
+    margin-bottom: 20px;
+    width: min(350px, 90vw);
+  }
+
+  .container {
+    padding-top: 30px;
+  }
+
+  .dice {
+    width: 75px;
+    height: 75px;
+    border-radius: 15px;
+    font-size: 32px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="galaxy"></div>
+
+<!-- LIVE -->
+<div class="live-panel">
+  <div class="live-title">🔴 Wer ist LIVE?</div>
+
+  <div class="live-user">
+    <div class="live-avatar">B</div>
+
+    <div>
+      <div class="live-name">Benox</div>
+      <div class="live-status">● LIVE</div>
+    </div>
+  </div>
+</div>
+
+<!-- VIP -->
+<button class="vip-button" onclick="openVIP()">
+  👑 VIP ROOM
+</button>
+
+<div class="container">
+
+  <h1>🌌 COLOR DICE 🎲</h1>
+  <div class="subtitle">Würfle deine Farbe!</div>
+
+  <div class="dice-area" id="diceArea">
+    <div class="dice red">●</div>
+    <div class="dice blue">●</div>
+    <div class="dice green">●</div>
+    <div class="dice purple">●</div>
+  </div>
+
+  <div class="buttons">
+    <button class="action-button" onclick="rollDice()">
+      🎲 WÜRFELN
+    </button>
+
+    <button class="action-button" onclick="flipCoin()">
+      🪙 KOPF ODER ZAHL
+    </button>
+  </div>
+
+  <div class="coin-result" id="coinResult"></div>
+
+  <div class="history-box">
+    <div class="history-title">
+      🕘 LETZTE 20 FARBEN
+    </div>
+
+    <div class="history" id="history"></div>
+  </div>
+
+</div>
+
+<!-- VIP MODAL -->
+<div class="modal" id="vipModal">
+  <div class="modal-box">
+    <h2>👑 VIP ROOM</h2>
+
+    <p>
+      Willkommen im VIP Room! 🌌
+    </p>
+
+    <p style="margin-top:12px; opacity:.7;">
+      Dieser Bereich ist für VIP-Mitglieder.
+    </p>
+
+    <button class="close" onclick="closeVIP()">
+      Schließen
+    </button>
+  </div>
+</div>
+
+<script>
+
+const colors = [
+  {
+    name: "Rot",
+    class: "red"
+  },
+  {
+    name: "Gelb",
+    class: "yellow"
+  },
+  {
+    name: "Blau",
+    class: "blue"
+  },
+  {
+    name: "Grün",
+    class: "green"
+  },
+  {
+    name: "Lila",
+    class: "purple"
+  },
+  {
+    name: "Orange",
+    class: "orange"
+  }
+];
+
+let history = [];
+
+function rollDice() {
+
+  const dice = document.querySelectorAll(".dice");
+
+  dice.forEach((die, index) => {
+
+    die.classList.remove("roll");
+
+    void die.offsetWidth;
+
+    die.classList.add("roll");
+
+    const color =
+      colors[Math.floor(Math.random() * colors.length)];
+
+    setTimeout(() => {
+
+      die.className = "dice " + color.class;
+      die.textContent = "●";
+
+      addHistory(color);
+
+    }, 300 + index * 70);
+
+  });
+}
+
+function addHistory(color) {
+
+  history.unshift(color);
+
+  if (history.length > 20) {
+    history.pop();
+  }
+
+  renderHistory();
+}
+
+function renderHistory() {
+
+  const box = document.getElementById("history");
+
+  box.innerHTML = "";
+
+  history.forEach(color => {
+
+    const item = document.createElement("div");
+
+    item.className =
+      "history-color " + color.class;
+
+    item.title = color.name;
+
+    box.appendChild(item);
+
+  });
+}
+
+function flipCoin() {
+
+  const result =
+    Math.random() < .5 ? "🪙 KOPF" : "🪙 ZAHL";
+
+  const element =
+    document.getElementById("coinResult");
+
+  element.textContent = result;
+}
+
+function openVIP() {
+  document.getElementById("vipModal").style.display = "flex";
+}
+
+function closeVIP() {
+  document.getElementById("vipModal").style.display = "none";
+}
+
+</script>
+
+</body>
+</html>
